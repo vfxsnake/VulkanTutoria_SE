@@ -44,7 +44,9 @@ test: a.out
 clean:
 	del $(BIN_DIR)\main.exe
 	del $(OBJ_DIR)\*.obj
+	del $(OBJ_DIR)\*.pdb
 	del $(SHADER_BIN_DIR)\*.spv
+	del *pdb
 
-# first it cleans the bind directory, then recompile all and call the execuateble
+# first it cleans the bind directory, then recompile all and call the executable
 all: clean test
