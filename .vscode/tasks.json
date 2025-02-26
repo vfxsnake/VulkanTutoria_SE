@@ -8,6 +8,7 @@
                 "/Zi",
                 "/EHsc",
                 "/nologo",
+                "/std:c++20",
                 "/I", "C:/VulkanSDK/1.4.304.0/Include", // Update this path if necessary
                 "/I", "C:/glfw-3.4_64/include",   // Update this path if necessary
                 "/Fo${workspaceFolder}/bin/", // Specify the output directory for object files
