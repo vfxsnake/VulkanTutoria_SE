@@ -22,7 +22,7 @@ private:
     // creating a glfw window instance
     GLFWwindow* window = nullptr;
     // creating the vulkan instance
-    VkInstance instance;
+    VkInstance instance;  // this instance will be used as reference and could be changed to a pointer if needed.
 
     void initWindow()
     {
@@ -34,7 +34,7 @@ private:
 
     void createInstance()
     {
-        VkApplicationInfo appInfo{}; // this is a struct
+        VkApplicationInfo appInfo{}; // this is a struct this will be used in create info structure bellow
         // as all vulkan structs we start by filling the data
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
         appInfo.pApplicationName = "Hello Triangle";
@@ -42,6 +42,33 @@ private:
         appInfo.pEngineName = "No Engine";
         appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
         appInfo.apiVersion = VK_API_VERSION_1_0;
+
+        VkInstanceCreateInfo createInfo{};
+        createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+        createInfo.pApplicationInfo = &appInfo;  // pointing to VkApplication info appInfo created above.
+
+        // creating variables to hold glfw extension count and glfw Extension's names.
+        uint32_t glfwExtensionCount = 0; // will hold the extension count out of glfwGetRequiredInstanceExtensions function.
+        const char** glfwExtensions;  // will hold the extension names as characters constant string. 
+        glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount); // out value passed by reference.
+        // filling the information for the VkInstanceCreateInfo created above.
+        createInfo.enabledExtensionCount = glfwExtensionCount;
+        createInfo.ppEnabledExtensionNames = glfwExtensions;
+
+        createInfo.enabledLayerCount = 0;
+        // creates the instance using the createInfo structure, and returns the instance as an output paramenter.
+        if (
+            vkCreateInstance(
+                &createInfo, // pointer to creation info structure. 
+                nullptr, // pointer to custom allocator callbacks, null this vulkan tutorial 
+                &instance // pointer to the instance
+                ) != VK_SUCCESS 
+            )
+            throw std::runtime_error("failed to create instance!");
+        else
+            {
+                std::cout << "instance successfully created" << "\n";
+            }
     }
 
     void initVulkan()
@@ -57,6 +84,8 @@ private:
     }
     void cleanup()
     {
+        // destroying the vulkan instance
+        vkDestroyInstance(instance, nullptr); 
         glfwDestroyWindow(window);  // destroying pointer created on initWindow
         glfwTerminate();  // closing glfw end of glfwInit()
     }
