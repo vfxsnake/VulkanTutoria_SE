@@ -1,4 +1,4 @@
-VULKAN_SDK_PATH = "C:/VulkanSDK/1.4.304.0"
+VULKAN_SDK_PATH = "C:/VulkanSDK/1.4.313.2"
 GLFW3_PATH = "C:/glfw-3.4_64"
 
 CFLAGS = /std:c++20 /EHsc /I. /I$(VULKAN_SDK_PATH)/Include /I$(GLFW3_PATH)/include /Isrc

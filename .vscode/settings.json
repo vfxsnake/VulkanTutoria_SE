@@ -64,5 +64,6 @@
         "iomanip": "cpp",
         "ratio": "cpp",
         "sstream": "cpp"
-    }
+    },
+    "C_Cpp.default.compilerPath": "cl.exe"
 }
