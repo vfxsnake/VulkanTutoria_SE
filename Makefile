@@ -1,52 +1,61 @@
-VULKAN_SDK_PATH = "C:/VulkanSDK/1.4.313.2"
-GLFW3_PATH = "C:/glfw-3.4_64"
+CC = cl.exe
+LD = link.exe
 
-CFLAGS = /std:c++20 /EHsc /I. /I$(VULKAN_SDK_PATH)/Include /I$(GLFW3_PATH)/include /Isrc
-LDFLAGS = /link /LIBPATH:$(VULKAN_SDK_PATH)/lib /LIBPATH:$(GLFW3_PATH)/lib-vc2022 vulkan-1.lib glfw3.lib glfw3_mt.lib glfw3dll.lib user32.lib gdi32.lib shell32.lib /NODEFAULTLIB:MSVCRT /NODEFAULTLIB:libucrt.lib ucrt.lib vcruntime.lib
+# Compiler flags
+CFLAGS = /EHsc /MD /std:c++20 /D__INTELLISENSE__
 
+# Include paths
+INCLUDE_PATHS = \
+    /IC:/VulkanSDK/1.4.313.2/Include \
+    /IC:/DEV/glfw_3.4_x64/include
+
+# Library paths
+LIB_PATHS = \
+    /LIBPATH:C:/VulkanSDK/1.4.313.2/Lib \
+    /LIBPATH:C:/DEV/glfw_3.4_x64/lib-vc2022
+
+# Libraries
+LIBS = \
+    vulkan-1.lib \
+    glfw3.lib \
+    gdi32.lib \
+    shell32.lib \
+    user32.lib \
+    legacy_stdio_definitions.lib
+
+# Output directories
 BIN_DIR = bin
-OBJ_DIR = $(BIN_DIR)
-SHADER_DIR = shaders
-SHADER_BIN_DIR = $(BIN_DIR)\$(SHADER_DIR)
+OBJ_DIR = obj
 
-SOURCES = $(wildcard src/*.cpp)
-OBJECTS = $(patsubst src/%.cpp,$(OBJ_DIR)/%.obj,$(SOURCES))
+# Source files
+SRCS = src/main.cpp
 
-VERT_SHADERS = $(wildcard $(SHADER_DIR)/*.vert)
-FRAG_SHADERS = $(wildcard $(SHADER_DIR)/*.frag)
-SPV_VERT_SHADERS = $(patsubst $(SHADER_DIR)/%.vert,$(SHADER_BIN_DIR)/%.vert.spv,$(VERT_SHADERS))
-SPV_FRAG_SHADERS = $(patsubst $(SHADER_DIR)/%.frag,$(SHADER_BIN_DIR)/%.frag.spv,$(FRAG_SHADERS))
+# Object files
+OBJS = $(patsubst src/%.cpp,$(OBJ_DIR)/%.obj,$(SRCS))
 
-a.out: $(OBJECTS) $(SPV_VERT_SHADERS) $(SPV_FRAG_SHADERS) | $(BIN_DIR)
-	link $(LDFLAGS) /OUT:$(BIN_DIR)/main.exe $(OBJECTS)
+# Executable name
+TARGET = $(BIN_DIR)/main.exe
 
-$(OBJ_DIR)/%.obj: src/%.cpp | $(BIN_DIR)
-	cl $(CFLAGS) /c $< /Fo$@
+.PHONY: all clean run
 
-$(SHADER_BIN_DIR)/%.vert.spv: $(SHADER_DIR)/%.vert | $(SHADER_BIN_DIR)
-	"$(VULKAN_SDK_PATH)/Bin/glslc.exe" $< -o $@
+all: $(TARGET)
 
-$(SHADER_BIN_DIR)/%.frag.spv: $(SHADER_DIR)/%.frag | $(SHADER_BIN_DIR)
-	"$(VULKAN_SDK_PATH)/Bin/glslc.exe" $< -o $@
+run: all
+	@echo Running $(TARGET)...
+	$(TARGET)
 
-$(BIN_DIR):
-	mkdir $(BIN_DIR)
+$(TARGET): $(OBJS)
+	@echo Creating $(BIN_DIR) directory if it does not exist...
+	@if not exist $(BIN_DIR) mkdir $(BIN_DIR)
+	$(LD) $(LIB_PATHS) $(LIBS) /out:$@ $(OBJS)
 
-$(SHADER_BIN_DIR):
-	mkdir $(SHADER_BIN_DIR)
-
-.PHONY: test clean all
-
-# build new changes and run exe
-test: a.out
-	$(BIN_DIR)/main.exe
+$(OBJ_DIR)/%.obj: src/%.cpp
+	@echo Creating $(OBJ_DIR) directory if it does not exist...
+	@if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
+	$(CC) $(CFLAGS) $(INCLUDE_PATHS) /c $< /Fo$@
 
 clean:
-	del $(BIN_DIR)\main.exe
-	del $(OBJ_DIR)\*.obj
-	del $(OBJ_DIR)\*.pdb
-	del $(SHADER_BIN_DIR)\*.spv
-	del *pdb
-
-# first it cleans the bind directory, then recompile all and call the executable
-all: clean test
+	@echo Cleaning up...
+	-@del /Q $(OBJS) $(TARGET) 2>nul
+	-@rmdir /S /Q $(OBJ_DIR) 2>nul
+	-@rmdir /S /Q $(BIN_DIR) 2>nul

@@ -4,8 +4,8 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "C:/VulkanSDK/1.4.304.0/Include",
-                "C:/glfw-3.4_64/include"
+                "C:/VulkanSDK/1.4.313.2/Include",
+                "C:/DEV/glfw_3.4_x64/include"
             ],
             "defines": [
                 "_DEBUG",
@@ -15,7 +15,7 @@
             "windowsSdkVersion": "10.0.22621.0",
             "compilerPath": "cl.exe",
             "cStandard": "c17",
-            "cppStandard": "c++17",
+            "cppStandard": "c++20",
             "intelliSenseMode": "windows-msvc-x64"
         }
     ],

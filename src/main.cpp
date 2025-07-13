@@ -1,148 +1,66 @@
-#define GLFW_INCLUDE_VULKAN
+
+#include <memory>
+#ifdef __INTELLISENSE__
+#include <vulkan/vulkan_raii.hpp>
+#else
+import vulkan_hpp;
+#endif
+#include <vulkan/vk_platform.h>
 #include <GLFW/glfw3.h>
 
 #include <iostream>
 #include <stdexcept>
 #include <cstdlib>
-#include <cstring>
-#include <vector>
- 
-const std::vector<const char*> validationLayers = {"VK_LAYER_KHRONOS_validation"};
 
-#ifdef NDEBUG
-const bool enableValidationLayers = false;
-#else
-    const bool enableValidationLayers = true;
-#endif
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 
-class HelloTriangleApplication
-{
+class HelloTriangleApplication {
 public:
-    void run()
-    {
+    void run() {
         initWindow();
         initVulkan();
         mainLoop();
         cleanup();
     }
+
 private:
-    // creating a glfw window instance
     GLFWwindow* window = nullptr;
-    // creating the vulkan instance
-    VkInstance instance;  // this instance will be used as reference and could be changed to a pointer if needed.
 
-    void initWindow()
-    {
-        glfwInit();  // initializing glfw this have to pair with glfwTerminta()
+    void initWindow() {
+        glfwInit();
+
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        glfwWindowHint(GLFW_RESIZABLE, false);
-        window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr); // creating a pointer to a glfw window
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
+        window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
     }
 
-    void createInstance()
-    {
-        // adding support for validation layers
-        if (enableValidationLayers && !checkValidationLayerSupport())
-        {
-            throw std::runtime_error("validation layers request but not found");
-        }
-        VkApplicationInfo appInfo{}; // this is a struct this will be used in create info structure bellow
-        // as all vulkan structs we start by filling the data
-        appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.pApplicationName = "Hello Triangle";
-        appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.pEngineName = "No Engine";
-        appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.apiVersion = VK_API_VERSION_1_0;
+    void initVulkan() {
 
-        VkInstanceCreateInfo createInfo{};
-        createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-        createInfo.pApplicationInfo = &appInfo;  // pointing to VkApplication info appInfo created above.
-
-        // creating variables to hold glfw extension count and glfw Extension's names.
-        uint32_t glfwExtensionCount = 0; // will hold the extension count out of glfwGetRequiredInstanceExtensions function.
-        const char** glfwExtensions;  // will hold the extension names as characters constant string. 
-        glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount); // out value passed by reference.
-        // filling the information for the VkInstanceCreateInfo created above.
-        createInfo.enabledExtensionCount = glfwExtensionCount;
-        createInfo.ppEnabledExtensionNames = glfwExtensions;
-
-        createInfo.enabledLayerCount = 0;
-        // creates the instance using the createInfo structure, and returns the instance as an output paramenter.
-        if (
-            vkCreateInstance(
-                &createInfo, // pointer to creation info structure. 
-                nullptr, // pointer to custom allocator callbacks, null this vulkan tutorial 
-                &instance // pointer to the instance
-                ) != VK_SUCCESS 
-            )
-            throw std::runtime_error("failed to create instance!");
-        else
-            {
-                std::cout << "instance successfully created" << "\n";
-            }
     }
 
-    void initVulkan()
-    {
-        createInstance();
-    }
-    void mainLoop()
-    {
-        while (!glfwWindowShouldClose(window))
-        {
+    void mainLoop() {
+        while (!glfwWindowShouldClose(window)) {
             glfwPollEvents();
         }
     }
-    void cleanup()
-    {
-        // destroying the vulkan instance
-        vkDestroyInstance(instance, nullptr); 
-        glfwDestroyWindow(window);  // destroying pointer created on initWindow
-        glfwTerminate();  // closing glfw end of glfwInit()
-    }
 
-    bool checkValidationLayerSupport()
-    {
-        uint32_t layerCount;
-        vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-        std::vector<VkLayerProperties> availableLayers(layerCount);
-        vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
-        for (const char* layerName: validationLayers)
-        {
-            bool layerFound = false;
-            for (const auto& layerProperties : availableLayers)
-            {
-                if (strcmp(layerName, layerProperties.layerName) == 0)
-                {
-                    layerFound = true;
-                    break;
-                }
-            }
-            if (!layerFound)
-            {
-                return false;
-            }
-        }
-        return true;
-    }
+    void cleanup() {
+        glfwDestroyWindow(window);
 
+        glfwTerminate();
+    }
 };
 
-int main()
-{
-    // create the instance of the app
-    HelloTriangleApplication app;
-    try
-    {
+int main() {
+    try {
+        HelloTriangleApplication app;
         app.run();
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << e.what() << '\n';
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << std::endl;
         return EXIT_FAILURE;
-    } 
+    }
+
     return EXIT_SUCCESS;
 }
